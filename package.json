@@ -47,8 +47,7 @@
   "dependencies": {
     "electron-settings": "^4.0.2",
     "electron-squirrel-startup": "^1.0.0",
-    "progressbar.js": "^1.1.0",
-    "timer.js": "^1.0.4"
+    "progressbar.js": "^1.1.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "6.0.0-beta.53",

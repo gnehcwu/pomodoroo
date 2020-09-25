@@ -1,38 +1,56 @@
 const settings = require('electron-settings');
 const ProgressBar = require('progressbar.js');
-const Timer = require('timer.js');
+
+const store = {
+  type: 'work'
+}
 
 const initSetting = () => {
-  if (!settings.getSync('workTime')) {
-    settings.setSync('workTime', 0.1);
+  if (!settings.getSync('work')) {
+    settings.setSync('work', 0.1);
   }
 
-  if (!settings.getSync('breakTIme')) {
-    settings.setSync('breakTIme', 5);
+  if (!settings.getSync('break')) {
+    settings.setSync('break', 5);
   }
 }
 
 // Init settings
 initSetting();
 
-const getWorkTime = () => {
-  return settings.getSync('workTime') || 0.1;
+const getCurrentTime = () => {
+  const currentType = `${['work', 'break'].find(item => item === store.type)}`;
+  return settings.getSync(currentType);
 }
 
-const getBreakTIme = () => {
-  return settings.getSync('breakTime');
+const leftTime = document.querySelector('.leftTime')
+const settingLeftTime = (timeStr) => {
+  leftTime.innerText = timeStr;
 }
+
+settingLeftTime(getCurrentTime());
 
 // Section: timer progressbar
 const bar = new ProgressBar.Circle('.progress', {
   strokeWidth: 3,
   easing: 'linear',
-  duration: getWorkTime() * 60 * 1000,
-  color: '#ED6A5A',
-  trailColor: '#ED6A5A33',
+  trailColor: '#eee',
   trailWidth: 3,
   svgStyle: {
     "stroke-linecap": 'round'
+  },
+  from: { color: '#F3ADA4' },
+  to: { color: '#ED6A5A' },
+  step: function (state, circle, attachment) {
+    circle.path.setAttribute('stroke', state.color);
+    const curValue = circle.value();
+    settingLeftTime(((1 - curValue) * getCurrentTime() * 60).toFixed());
+
+    if (curValue === 1) {
+      document.querySelector('#start').classList.remove('hide');
+      document.querySelector('#stop').classList.add('hide');
+      document.querySelector(`#${['work', 'break'].find(item => item !== store.type)}`).click();
+    }
   }
 });
 
@@ -47,34 +65,18 @@ timeControl.addEventListener('click', event => {
 
   for (const control of controls) {
     if (event.target !== control) {
-      control.classList.remove('hide')
+      control.classList.remove('hide');
     }
   }
 
   if (targetId === 'start') {
-    bar.animate(1.0);
-    const timer = createTimer();
-    timer.start(settings.getSync('workTime') * 60)
+    bar.animate(1.0, {
+      duration: getCurrentTime() * 60 * 1000,
+    });
   } else if (targetId === 'stop') {
     bar.stop();
   }
 });
-
-// Section: setting time count
-const leftTime = document.querySelector('.leftTime')
-const settingLeftTime = (timeStr) => {
-  leftTime.innerText = timeStr;
-}
-
-const createTimer = () => {
-  return new Timer({
-    tick: 1,
-    ontick: (ms) => { console.log(1111, ms) },
-    onend: function () {
-      alert('timer end')
-    }
-  });
-}
 
 // Section: handling work/break mode switch
 const tabs = document.querySelectorAll('.tab')
@@ -90,4 +92,11 @@ controlArea.addEventListener('click', event => {
       tab.classList.remove('selected')
     }
   }
+
+  if (targetId === 'work') {
+    store.type = 'work';
+  } else {
+    store.type = 'break';
+  }
+  bar.set(0);
 });
