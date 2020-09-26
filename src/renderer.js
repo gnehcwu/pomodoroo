@@ -1,5 +1,6 @@
 const settings = require('electron-settings');
 const ProgressBar = require('progressbar.js');
+const path = require('path');
 
 const store = {
   type: 'work'
@@ -23,18 +24,31 @@ const getCurrentTime = () => {
   return settings.getSync(currentType);
 }
 
+const formatTime = (minutes) => {
+  const dateObj = new Date(minutes * 60 * 1000);
+  const mins = dateObj.getUTCMinutes();
+  const secs = dateObj.getSeconds();
+
+  return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+}
+
 const leftTime = document.querySelector('.leftTime')
-const settingLeftTime = (timeStr) => {
-  leftTime.innerText = timeStr;
+const settingLeftTime = (minutes) => {
+  leftTime.innerText = formatTime(minutes);
 }
 
 settingLeftTime(getCurrentTime());
+
+const playAudio = (name) => {
+  const auddio = new Audio(path.join(__dirname, '..', 'assets', `${name}.mp3`));
+  auddio.play();
+}
 
 // Section: timer progressbar
 const bar = new ProgressBar.Circle('.progress', {
   strokeWidth: 3,
   easing: 'linear',
-  trailColor: '#eee',
+  trailColor: '#ED6A5A44',
   trailWidth: 3,
   svgStyle: {
     "stroke-linecap": 'round'
@@ -44,9 +58,10 @@ const bar = new ProgressBar.Circle('.progress', {
   step: function (state, circle, attachment) {
     circle.path.setAttribute('stroke', state.color);
     const curValue = circle.value();
-    settingLeftTime(((1 - curValue) * getCurrentTime() * 60).toFixed());
+    settingLeftTime((1 - curValue) * getCurrentTime());
 
     if (curValue === 1) {
+      playAudio('end');
       document.querySelector('#start').classList.remove('hide');
       document.querySelector('#stop').classList.add('hide');
       document.querySelector(`#${['work', 'break'].find(item => item !== store.type)}`).click();
@@ -70,10 +85,12 @@ timeControl.addEventListener('click', event => {
   }
 
   if (targetId === 'start') {
+    playAudio('start');
     bar.animate(1.0, {
       duration: getCurrentTime() * 60 * 1000,
     });
   } else if (targetId === 'stop') {
+    playAudio('start');
     bar.stop();
   }
 });
@@ -99,4 +116,7 @@ controlArea.addEventListener('click', event => {
     store.type = 'break';
   }
   bar.set(0);
+  document.querySelector('#start').classList.remove('hide');
+  document.querySelector('#stop').classList.add('hide');
+  settingLeftTime(getCurrentTime());
 });
