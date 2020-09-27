@@ -48,7 +48,7 @@ const playAudio = (name) => {
 const bar = new ProgressBar.Circle('.progress', {
   strokeWidth: 3,
   easing: 'linear',
-  trailColor: '#ED6A5A44',
+  trailColor: '#ED6A5A33',
   trailWidth: 3,
   svgStyle: {
     "stroke-linecap": 'round'
@@ -71,7 +71,8 @@ const bar = new ProgressBar.Circle('.progress', {
 
 // Section: handling start/pause timer
 const controls = document.querySelectorAll('.control');
-const timeControl = document.querySelector('.timeControl')
+const timeControl = document.querySelector('.timeControl');
+
 timeControl.addEventListener('click', event => {
   const { id: targetId } = event.target
   if (!['start', 'stop'].includes(targetId)) return;
@@ -98,25 +99,30 @@ timeControl.addEventListener('click', event => {
 // Section: handling work/break mode switch
 const tabs = document.querySelectorAll('.tab')
 const controlArea = document.querySelector('.controlArea');
+const viewport = document.querySelector('.viewport');
+
 controlArea.addEventListener('click', event => {
   const { id: targetId } = event.target
-  if (!['work', 'break'].includes(targetId)) return;
+  if (!['work', 'break', 'settings'].includes(targetId)) return;
+
+  for (const tab of tabs) {
+    tab.classList.remove('selected');
+  }
 
   event.target.classList.add('selected');
 
-  for (const tab of tabs) {
-    if (event.target !== tab) {
-      tab.classList.remove('selected')
-    }
-  }
-
-  if (targetId === 'work') {
-    store.type = 'work';
+  if (targetId === 'settings') {
+    viewport.style.transform = `translate(-${viewport.clientWidth / 2}px)`;
   } else {
-    store.type = 'break';
+    viewport.style.transform = `translate(0px)`;
+    if (targetId === 'work') {
+      store.type = 'work';
+    } else {
+      store.type = 'break';
+    }
+    bar.set(0);
+    document.querySelector('#start').classList.remove('hide');
+    document.querySelector('#stop').classList.add('hide');
+    settingLeftTime(getCurrentTime());
   }
-  bar.set(0);
-  document.querySelector('#start').classList.remove('hide');
-  document.querySelector('#stop').classList.add('hide');
-  settingLeftTime(getCurrentTime());
 });
