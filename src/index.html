@@ -34,18 +34,28 @@
             <div class="settingContent">
               <h3>Time (minutes)</h3>
               <div class="settingItem">
-                <label for="pomodoro">Pomodoro</label>
+                <label for="work-input">Pomodoro</label>
                 <input
                   type="number"
                   min="1"
+                  max="59"
                   step="1"
                   name="pomodoro"
-                  id="pomodoro"
+                  id="work-input"
+                  data-id="work"
                 />
               </div>
               <div class="settingItem">
-                <label for="break">Break</label>
-                <input type="number" min="1" step="1" name="break" id="break" />
+                <label for="break-input">Break</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  step="1"
+                  name="break"
+                  id="break-input"
+                  data-id="break"
+                />
               </div>
             </div>
           </div>

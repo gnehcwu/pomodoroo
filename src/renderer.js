@@ -3,7 +3,9 @@ const ProgressBar = require('progressbar.js');
 const path = require('path');
 
 const store = {
-  type: 'work'
+  type: 'work',
+  prev: '',
+  settingUpdated: false
 }
 
 const initSetting = () => {
@@ -33,11 +35,11 @@ const formatTime = (minutes) => {
 }
 
 const leftTime = document.querySelector('.leftTime')
-const settingLeftTime = (minutes) => {
+const setLeftTime = (minutes) => {
   leftTime.innerText = formatTime(minutes);
 }
 
-settingLeftTime(getCurrentTime());
+setLeftTime(getCurrentTime());
 
 const playAudio = (name) => {
   const auddio = new Audio(path.join(__dirname, '..', 'assets', `${name}.mp3`));
@@ -58,7 +60,7 @@ const bar = new ProgressBar.Circle('.progress', {
   step: function (state, circle, attachment) {
     circle.path.setAttribute('stroke', state.color);
     const curValue = circle.value();
-    settingLeftTime((1 - curValue) * getCurrentTime());
+    setLeftTime((1 - curValue) * getCurrentTime());
 
     if (curValue === 1) {
       playAudio('end');
@@ -113,16 +115,42 @@ controlArea.addEventListener('click', event => {
 
   if (targetId === 'settings') {
     viewport.style.transform = `translate(-${viewport.clientWidth / 2}px)`;
+    store.prev = 'setting';
   } else {
     viewport.style.transform = `translate(0px)`;
-    if (targetId === 'work') {
-      store.type = 'work';
-    } else {
-      store.type = 'break';
+
+    if (targetId !== store.type || store.settingUpdated) {
+      store.type = targetId;
+      bar.set(0);
+      document.querySelector('#start').classList.remove('hide');
+      document.querySelector('#stop').classList.add('hide');
+      setLeftTime(getCurrentTime());
     }
-    bar.set(0);
-    document.querySelector('#start').classList.remove('hide');
-    document.querySelector('#stop').classList.add('hide');
-    settingLeftTime(getCurrentTime());
+
+    store.prev = targetId;
+    store.settingUpdated = false;
   }
+});
+
+// Section: settings
+const setttingInputs = document.querySelectorAll('.settingItem input');
+const initSettings = () => {
+  const settingMap = new Map([
+    ['work', (input => input.value = settings.getSync('work'))],
+    ['break', (input => input.value = settings.getSync('break'))]
+  ]);
+
+  for (const input of setttingInputs) {
+    settingMap.get(input.dataset.id)(input);
+  }
+}
+
+initSettings();
+
+const settingContent = document.querySelector('.settingContent');
+settingContent.addEventListener('change', event => {
+  store.settingUpdated = true;
+  const { type, dataset: { id } } = event.target;
+  if (type !== 'number') return;
+  settings.setSync(`${id}`, event.target.value);
 });
