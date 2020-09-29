@@ -1,7 +1,7 @@
+const { shell, ipcRenderer } = require('electron');
 const settings = require('electron-settings');
 const ProgressBar = require('progressbar.js');
 const path = require('path');
-const shell = require('electron').shell;
 
 const store = {
   type: 'work',
@@ -21,6 +21,10 @@ const initSetting = () => {
 
 // Init settings
 initSetting();
+
+// For testing
+settings.setSync('work', 0.1);
+settings.setSync('break', 0.1);
 
 const getCurrentTime = () => {
   const currentType = ['work', 'break'].find(t => t === store.type);
@@ -56,6 +60,50 @@ const switchStartPauseCtl = () => {
   document.querySelector('#stop').classList.add('hide');
 };
 
+const startWork = () => {
+  document.querySelector('#work').click();
+  document.querySelector('#start').click();
+}
+
+const startRest = () => {
+  document.querySelector('#break').click();
+  document.querySelector('#start').click();
+}
+
+const notification = async ({ title, body, actionText, onaction }) => {
+  let res;
+  try {
+    res = await ipcRenderer.invoke('notification', {
+      title,
+      body,
+      actions: [{ text: actionText, type: 'button' }],
+    })
+  } catch (err) {
+    return;
+  }
+  res.event === 'action' && onaction();
+}
+
+const fireNotification = () => {
+  if (process.platform === 'darwin') {
+    const data = {
+      work: {
+        title: '☕',
+        body: 'Time to take a break!',
+        actionText: 'Rest',
+        onaction: startRest
+      },
+      break: {
+        title: '🖥️',
+        body: 'Time to work!',
+        actionText: 'Start',
+        onaction: startWork
+      }
+    };
+    notification(data[store.type]);
+  }
+}
+
 // Section: timer progressbar
 const bar = new ProgressBar.Circle('.progress', {
   strokeWidth: 3,
@@ -76,6 +124,7 @@ const bar = new ProgressBar.Circle('.progress', {
     if (curValue === 1) {
       playAudio('ring');
       switchStartPauseCtl();
+      fireNotification();
       document.querySelector(`#${['work', 'break'].find(item => item !== store.type)}`).click();
     }
   }
@@ -167,7 +216,7 @@ settingContent.addEventListener('change', event => {
 
 
 // Section for github link
-document.querySelector('.githubLink').addEventListener('click', (event) => {
+document.querySelector('.githubLink svg').addEventListener('click', (event) => {
   event.preventDefault();
   shell.openExternal('https://github.com/gnehcwu/pomodoroo');
 });
