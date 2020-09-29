@@ -37,33 +37,45 @@ body {
   grid-column: 2/3;
   display: grid;
   grid-template-rows: min-content auto;
+  grid-gap: 16px;
   padding: 0 16px;
 }
 
-.settingArea h2 {
+.settingHeader {
   grid-row: 1/2;
-  text-transform: uppercase;
   border-bottom: 1px solid rgba(182, 165, 166, 0.2);
+  display: grid;
+  grid-template-columns: max-content auto;
+  padding: 16px 16px 0 0;
+  grid-gap: 8px;
+}
+
+.settingArea h2 {
+  text-transform: uppercase;
   font-size: 17px;
-  color: #bbb;
+  color: #7d7c84;
   font-weight: bold;
-  padding: 16px 16px 8px 0;
+}
+
+.githubLink {
+  display: grid;
+  justify-content: start;
+  align-content: center;
+}
+
+.githubLink svg {
+  width: 24px;
+}
+
+.githubLink svg:hover {
+  fill: #ed6a5a;
 }
 
 .settingContent {
   grid-row: 2/3;
   display: grid;
-  grid-gap: 8px;
+  grid-gap: 16px;
   align-content: start;
-}
-
-.settingContent h3 {
-  color: rgb(85, 85, 85);
-  font-weight: bold;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 4px;
 }
 
 .settingItem {
@@ -73,9 +85,9 @@ body {
 
 .settingItem label {
   font-size: 14px;
-  color: rgb(187, 187, 187);
+  color: #7d7c84;
   font-weight: bold;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .settingItem input {
@@ -86,7 +98,7 @@ body {
   padding: 10px;
   box-shadow: none;
   border: none;
-  color: rgb(85, 85, 85);
+  color: #7d7c84;
   box-sizing: border-box;
 }
 
@@ -100,8 +112,8 @@ body {
 }
 
 .progress {
-  width: 160px;
-  height: 160px;
+  width: 140px;
+  height: 140px;
 }
 
 .leftTime {

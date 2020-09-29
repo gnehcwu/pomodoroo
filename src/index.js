@@ -9,9 +9,11 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 250,
-    height: 356,
+    width: 230,
+    height: 328,
     resizable: true,
+    frame: false,
+    transparent: true,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,

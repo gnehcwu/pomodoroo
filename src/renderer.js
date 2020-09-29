@@ -1,12 +1,13 @@
 const settings = require('electron-settings');
 const ProgressBar = require('progressbar.js');
 const path = require('path');
+const shell = require('electron').shell;
 
 const store = {
   type: 'work',
   prev: '',
   settingUpdated: false
-}
+};
 
 const initSetting = () => {
   if (!settings.getSync('work')) {
@@ -16,35 +17,44 @@ const initSetting = () => {
   if (!settings.getSync('break')) {
     settings.setSync('break', 5);
   }
-}
+};
 
 // Init settings
 initSetting();
 
 const getCurrentTime = () => {
-  const currentType = `${['work', 'break'].find(item => item === store.type)}`;
+  const currentType = ['work', 'break'].find(t => t === store.type);
   return settings.getSync(currentType);
-}
+};
 
 const formatTime = (minutes) => {
   const dateObj = new Date(minutes * 60 * 1000);
   const mins = dateObj.getUTCMinutes();
   const secs = dateObj.getSeconds();
+  const padding = (time) => time.toString().padStart(2, '0');
 
-  return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
-}
+  return `${padding(mins)}:${padding(secs)}`;
+};
 
-const leftTime = document.querySelector('.leftTime')
+const leftTimeCtl = document.querySelector('.leftTime');
 const setLeftTime = (minutes) => {
-  leftTime.innerText = formatTime(minutes);
-}
+  leftTimeCtl.innerText = formatTime(minutes);
+};
 
+// Set left time when rendering for the first time
 setLeftTime(getCurrentTime());
 
+// Play audio when start/pause/end timer
 const playAudio = (name) => {
   const auddio = new Audio(path.join(__dirname, '..', 'assets', `${name}.mp3`));
   auddio.play();
-}
+};
+
+// Switch start/pause controls
+const switchStartPauseCtl = () => {
+  document.querySelector('#start').classList.remove('hide');
+  document.querySelector('#stop').classList.add('hide');
+};
 
 // Section: timer progressbar
 const bar = new ProgressBar.Circle('.progress', {
@@ -57,15 +67,15 @@ const bar = new ProgressBar.Circle('.progress', {
   },
   from: { color: '#F3ADA4' },
   to: { color: '#ED6A5A' },
-  step: function (state, circle, attachment) {
+  step: (state, circle) => {
     circle.path.setAttribute('stroke', state.color);
+
     const curValue = circle.value();
     setLeftTime((1 - curValue) * getCurrentTime());
 
     if (curValue === 1) {
-      playAudio('end');
-      document.querySelector('#start').classList.remove('hide');
-      document.querySelector('#stop').classList.add('hide');
+      playAudio('ring');
+      switchStartPauseCtl();
       document.querySelector(`#${['work', 'break'].find(item => item !== store.type)}`).click();
     }
   }
@@ -76,7 +86,7 @@ const controls = document.querySelectorAll('.control');
 const timeControl = document.querySelector('.timeControl');
 
 timeControl.addEventListener('click', event => {
-  const { id: targetId } = event.target
+  const { id: targetId } = event.target;
   if (!['start', 'stop'].includes(targetId)) return;
 
   event.target.classList.add('hide');
@@ -88,23 +98,23 @@ timeControl.addEventListener('click', event => {
   }
 
   if (targetId === 'start') {
-    playAudio('start');
+    playAudio('tick');
     bar.animate(1.0, {
       duration: getCurrentTime() * 60 * 1000,
     });
   } else if (targetId === 'stop') {
-    playAudio('start');
+    playAudio('tick');
     bar.stop();
   }
 });
 
 // Section: handling work/break mode switch
-const tabs = document.querySelectorAll('.tab')
+const tabs = document.querySelectorAll('.tab');
 const controlArea = document.querySelector('.controlArea');
 const viewport = document.querySelector('.viewport');
 
 controlArea.addEventListener('click', event => {
-  const { id: targetId } = event.target
+  const { id: targetId } = event.target;
   if (!['work', 'break', 'settings'].includes(targetId)) return;
 
   for (const tab of tabs) {
@@ -122,8 +132,7 @@ controlArea.addEventListener('click', event => {
     if (targetId !== store.type || store.settingUpdated) {
       store.type = targetId;
       bar.set(0);
-      document.querySelector('#start').classList.remove('hide');
-      document.querySelector('#stop').classList.add('hide');
+      switchStartPauseCtl();
       setLeftTime(getCurrentTime());
     }
 
@@ -143,8 +152,9 @@ const initSettings = () => {
   for (const input of setttingInputs) {
     settingMap.get(input.dataset.id)(input);
   }
-}
+};
 
+// Init values for setting page
 initSettings();
 
 const settingContent = document.querySelector('.settingContent');
@@ -153,4 +163,11 @@ settingContent.addEventListener('change', event => {
   const { type, dataset: { id } } = event.target;
   if (type !== 'number') return;
   settings.setSync(`${id}`, event.target.value);
+});
+
+
+// Section for github link
+document.querySelector('.githubLink').addEventListener('click', (event) => {
+  event.preventDefault();
+  shell.openExternal('https://github.com/gnehcwu/pomodoroo');
 });
