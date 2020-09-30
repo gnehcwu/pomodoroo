@@ -1,6 +1,6 @@
 {
   "name": "pomodoroo",
-  "productName": "pomodoroo",
+  "productName": "Pomodoroo",
   "version": "1.0.0",
   "description": "Pomodoro timer",
   "main": "src/index.js",
@@ -13,13 +13,14 @@
   },
   "keywords": [],
   "author": {
-    "name": "Cheng Wu",
-    "email": "iwucheng@gmail.com"
+    "name": "Cheng Wu"
   },
   "license": "MIT",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "assets/icon.icns"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",

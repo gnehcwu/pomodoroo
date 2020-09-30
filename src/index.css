@@ -8,7 +8,7 @@ body {
 .container {
   display: grid;
   grid-template-rows: min-content 65px;
-  grid-gap: 10px;
+  grid-gap: 4px;
 }
 
 .content {
@@ -30,7 +30,7 @@ body {
   place-content: center;
   grid-template-rows: auto min-content;
   grid-gap: 28px;
-  padding: 1.5em 0;
+  padding: 1em 0;
 }
 
 .settingArea {

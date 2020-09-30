@@ -176,7 +176,7 @@ controlArea.addEventListener('click', event => {
     viewport.style.transform = `translate(-${viewport.clientWidth / 2}px)`;
     store.prev = 'setting';
   } else {
-    viewport.style.transform = `translate(0px)`;
+    viewport.style.transform = `translate(0)`;
 
     if (targetId !== store.type || store.settingUpdated) {
       store.type = targetId;
@@ -215,7 +215,7 @@ settingContent.addEventListener('change', event => {
 });
 
 
-// Section for github link
+// Section: link to github repo
 document.querySelector('.githubLink svg').addEventListener('click', (event) => {
   event.preventDefault();
   shell.openExternal('https://github.com/gnehcwu/pomodoroo');
