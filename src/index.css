@@ -7,8 +7,8 @@ body {
 
 .container {
   display: grid;
-  grid-template-rows: min-content 65px;
-  grid-gap: 4px;
+  grid-template-rows: min-content 50px;
+  grid-gap: 8px;
 }
 
 .content {
@@ -29,7 +29,7 @@ body {
   display: grid;
   place-content: center;
   grid-template-rows: auto min-content;
-  grid-gap: 28px;
+  grid-gap: 24px;
   padding: 1em 0;
 }
 
@@ -194,8 +194,8 @@ body {
 }
 
 .tab svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   fill: #7d7c84;
   pointer-events: none;
   transition: all ease-in-out 0.2s;

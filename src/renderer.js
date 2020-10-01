@@ -6,12 +6,13 @@ const path = require('path');
 const store = {
   type: 'work',
   prev: '',
-  settingUpdated: false
+  settingUpdated: false,
+  gone: 0
 };
 
 const initSetting = () => {
   if (!settings.getSync('work')) {
-    settings.setSync('work', 0.1);
+    settings.setSync('work', 25);
   }
 
   if (!settings.getSync('break')) {
@@ -21,10 +22,6 @@ const initSetting = () => {
 
 // Init settings
 initSetting();
-
-// For testing
-settings.setSync('work', 0.1);
-settings.setSync('break', 0.1);
 
 const getCurrentTime = () => {
   const currentType = ['work', 'break'].find(t => t === store.type);
@@ -106,22 +103,24 @@ const fireNotification = () => {
 
 // Section: timer progressbar
 const bar = new ProgressBar.Circle('.progress', {
-  strokeWidth: 3,
+  strokeWidth: 4,
   easing: 'linear',
   trailColor: '#ED6A5A33',
-  trailWidth: 3,
+  trailWidth: 4,
   svgStyle: {
     "stroke-linecap": 'round'
   },
-  from: { color: '#F3ADA4' },
+  from: { color: '#F99689' },
   to: { color: '#ED6A5A' },
   step: (state, circle) => {
     circle.path.setAttribute('stroke', state.color);
 
     const curValue = circle.value();
     setLeftTime((1 - curValue) * getCurrentTime());
+    store.gone = curValue;
 
     if (curValue === 1) {
+      store.gone = 0;
       playAudio('ring');
       switchStartPauseCtl();
       fireNotification();
@@ -149,7 +148,7 @@ timeControl.addEventListener('click', event => {
   if (targetId === 'start') {
     playAudio('tick');
     bar.animate(1.0, {
-      duration: getCurrentTime() * 60 * 1000,
+      duration: (1 - store.gone) * getCurrentTime() * 60 * 1000,
     });
   } else if (targetId === 'stop') {
     playAudio('tick');

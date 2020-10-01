@@ -35,9 +35,9 @@ const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 215,
-    height: 305,
+    height: 290,
     backgroundColor: '#FFF',
-    resizable: true,
+    resizable: false,
     frame: false,
     show: false,
     skipTaskbar: true,
