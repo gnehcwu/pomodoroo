@@ -5,11 +5,6 @@ const TrayGenerator = require('./trayGenerator');
 let mainWindow = null;
 let tray = null;
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
-  app.quit();
-}
-
 const handleNotification = async () => {
   ipcMain.handle('notification', async (_, { title, body, actions }) => {
     let res = await new Promise((resolve) => {
