@@ -1,4 +1,4 @@
-const { app, Tray, Menu } = require('electron');
+const { Tray, Menu } = require('electron');
 const path = require('path');
 
 class TrayGenerator {
@@ -19,9 +19,6 @@ class TrayGenerator {
     const position = this.getWindowPosition();
     this.mainWindow.setPosition(position.x, position.y, false);
     this.mainWindow.show();
-    // this.mainWindow.setVisibleOnAllWorkspaces(true);
-    // this.mainWindow.focus();
-    // this.mainWindow.setVisibleOnAllWorkspaces(false);
   };
 
   toggleWindow = () => {

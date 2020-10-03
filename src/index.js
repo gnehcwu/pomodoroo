@@ -13,8 +13,8 @@ const handleNotification = async () => {
         body,
         actions,
         silent: true
-      })
-      notification.show()
+      });
+      notification.show();
       notification.on('action', () => {
         resolve({ event: 'action' });
       });
@@ -23,7 +23,13 @@ const handleNotification = async () => {
       });
     });
     return res;
-  })
+  });
+}
+
+const handleWindowBlur = () => {
+  mainWindow.on('blur', () => {
+    mainWindow.hide();
+  });
 }
 
 const createWindow = () => {
@@ -35,7 +41,6 @@ const createWindow = () => {
     resizable: false,
     frame: false,
     show: false,
-    skipTaskbar: true,
     fullscreenable: false,
     webPreferences: {
       nodeIntegration: true,
@@ -53,6 +58,7 @@ const createWindow = () => {
 app.on('ready', () => {
   handleNotification();
   createWindow();
+  handleWindowBlur();
   tray = new TrayGenerator(mainWindow);
   tray.createTray();
 });

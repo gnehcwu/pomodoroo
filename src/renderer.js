@@ -1,6 +1,7 @@
 const { shell, ipcRenderer } = require('electron');
 const settings = require('electron-settings');
 const ProgressBar = require('progressbar.js');
+const Timer = require('timer.js');
 const path = require('path');
 
 const store = {
@@ -118,41 +119,49 @@ const bar = new ProgressBar.Circle('.progress', {
     const curValue = circle.value();
     setLeftTime((1 - curValue) * getCurrentTime());
     store.gone = curValue;
-
-    if (curValue === 1) {
-      store.gone = 0;
-      playAudio('ring');
-      switchStartPauseCtl();
-      fireNotification();
-      document.querySelector(`#${['work', 'break'].find(item => item !== store.type)}`).click();
-    }
   }
 });
+
+const timer = new Timer({
+  tick: 1,
+  onend: () => {
+    store.gone = 0;
+    playAudio('ring');
+    switchStartPauseCtl();
+    fireNotification();
+    document.querySelector(`#${['work', 'break'].find(item => item !== store.type)}`).click();
+  }
+})
 
 // Section: handling start/pause timer
 const controls = document.querySelectorAll('.control');
 const timeControl = document.querySelector('.timeControl');
 
+const setCtlState = (target) => {
+  for (const control of controls) {
+    control.classList.remove('hide');
+  }
+
+  target.classList.add('hide');
+}
+
 timeControl.addEventListener('click', event => {
   const { id: targetId } = event.target;
   if (!['start', 'stop'].includes(targetId)) return;
 
-  event.target.classList.add('hide');
-
-  for (const control of controls) {
-    if (event.target !== control) {
-      control.classList.remove('hide');
-    }
-  }
+  setCtlState(event.target);
 
   if (targetId === 'start') {
     playAudio('tick');
+    const left = (1 - store.gone) * getCurrentTime() * 60;
     bar.animate(1.0, {
-      duration: (1 - store.gone) * getCurrentTime() * 60 * 1000,
+      duration: left * 1000,
     });
+    timer.start(left);
   } else if (targetId === 'stop') {
     playAudio('tick');
     bar.stop();
+    timer.pause();
   }
 });
 
@@ -161,15 +170,19 @@ const tabs = document.querySelectorAll('.tab');
 const controlArea = document.querySelector('.controlArea');
 const viewport = document.querySelector('.viewport');
 
-controlArea.addEventListener('click', event => {
-  const { id: targetId } = event.target;
-  if (!['work', 'break', 'settings'].includes(targetId)) return;
-
+const setTabState = (target) => {
   for (const tab of tabs) {
     tab.classList.remove('selected');
   }
 
-  event.target.classList.add('selected');
+  target.classList.add('selected');
+}
+
+controlArea.addEventListener('click', event => {
+  const { id: targetId } = event.target;
+  if (!['work', 'break', 'settings'].includes(targetId)) return;
+
+  setTabState(event.target);
 
   if (targetId === 'settings') {
     viewport.style.transform = `translate(-${viewport.clientWidth / 2}px)`;
@@ -210,12 +223,13 @@ settingContent.addEventListener('change', event => {
   store.settingUpdated = true;
   const { type, dataset: { id } } = event.target;
   if (type !== 'number') return;
+
   settings.setSync(`${id}`, event.target.value);
 });
 
 
 // Section: link to github repo
-document.querySelector('.githubLink svg').addEventListener('click', (event) => {
+document.querySelector('.githubLink svg').addEventListener('click', async (event) => {
   event.preventDefault();
-  shell.openExternal('https://github.com/gnehcwu/pomodoroo');
+  await shell.openExternal('https://github.com/gnehcwu/pomodoroo');
 });
